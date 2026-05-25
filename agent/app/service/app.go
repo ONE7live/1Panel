@@ -32,7 +32,6 @@ import (
 	"github.com/1Panel-dev/1Panel/agent/utils/docker"
 	"github.com/1Panel-dev/1Panel/agent/utils/files"
 	"github.com/1Panel-dev/1Panel/agent/utils/req_helper"
-	"github.com/1Panel-dev/1Panel/agent/utils/xpack"
 	"gopkg.in/yaml.v3"
 )
 
@@ -966,57 +965,57 @@ func deleteCustomApp() {
 }
 
 func (a AppService) SyncAppListFromRemote(taskID string) (err error) {
-	if xpack.IsUseCustomApp() {
-		return nil
-	}
-
-	appStoreSyncMu.Lock()
-	global.LOG.Info("[AppStore] sync app from remote task create start")
-	if appStoreSyncing {
-		appStoreSyncMu.Unlock()
-		global.LOG.Info("[AppStore] sync already in progress, skipping")
-		return nil
-	}
-	appStoreSyncing = true
-	appStoreSyncMu.Unlock()
-
-	syncTask, err := task.NewTaskWithOps(i18n.GetMsgByKey("App"), task.TaskSync, task.TaskScopeAppStore, taskID, 0)
-	if err != nil {
-		appStoreSyncMu.Lock()
-		appStoreSyncing = false
-		appStoreSyncMu.Unlock()
-		return err
-	}
-
-	var sharedCtx *appSyncContext
-
-	syncTask.AddSubTask(task.GetTaskName(i18n.GetMsgByKey("App"), task.TaskSync, task.TaskScopeAppStore), a.createSyncAppStoreTask(&sharedCtx), nil)
-	syncTask.AddSubTask(i18n.GetMsgByKey("SyncAppDetail"), a.createSyncAppStoreMetaTask(&sharedCtx), nil)
-
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				global.LOG.Errorf("[AppStore] sync goroutine recovered from panic: %v", r)
-				if updateErr := NewISettingService().Update("AppStoreSyncStatus", constant.StatusError); updateErr != nil {
-					global.LOG.Warnf("[AppStore] failed to update sync status after panic: %v", updateErr)
-				}
-			}
-			appStoreSyncMu.Lock()
-			appStoreSyncing = false
-			appStoreSyncMu.Unlock()
-		}()
-		if err := syncTask.Execute(); err != nil {
-			if updateErr := NewISettingService().Update("AppStoreLastModified", "0"); updateErr != nil {
-				global.LOG.Warnf("[AppStore] failed to reset last modified: %v", updateErr)
-			}
-			if updateErr := NewISettingService().Update("AppStoreSyncStatus", constant.StatusError); updateErr != nil {
-				global.LOG.Warnf("[AppStore] failed to update sync status to error: %v", updateErr)
-			}
-			return
-		}
-	}()
-
-	global.LOG.Info("[AppStore] sync app from remote task create ok")
+	//if xpack.IsUseCustomApp() {
+	//	return nil
+	//}
+	//
+	//appStoreSyncMu.Lock()
+	//global.LOG.Info("[AppStore] sync app from remote task create start")
+	//if appStoreSyncing {
+	//	appStoreSyncMu.Unlock()
+	//	global.LOG.Info("[AppStore] sync already in progress, skipping")
+	//	return nil
+	//}
+	//appStoreSyncing = true
+	//appStoreSyncMu.Unlock()
+	//
+	//syncTask, err := task.NewTaskWithOps(i18n.GetMsgByKey("App"), task.TaskSync, task.TaskScopeAppStore, taskID, 0)
+	//if err != nil {
+	//	appStoreSyncMu.Lock()
+	//	appStoreSyncing = false
+	//	appStoreSyncMu.Unlock()
+	//	return err
+	//}
+	//
+	//var sharedCtx *appSyncContext
+	//
+	//syncTask.AddSubTask(task.GetTaskName(i18n.GetMsgByKey("App"), task.TaskSync, task.TaskScopeAppStore), a.createSyncAppStoreTask(&sharedCtx), nil)
+	//syncTask.AddSubTask(i18n.GetMsgByKey("SyncAppDetail"), a.createSyncAppStoreMetaTask(&sharedCtx), nil)
+	//
+	//go func() {
+	//	defer func() {
+	//		if r := recover(); r != nil {
+	//			global.LOG.Errorf("[AppStore] sync goroutine recovered from panic: %v", r)
+	//			if updateErr := NewISettingService().Update("AppStoreSyncStatus", constant.StatusError); updateErr != nil {
+	//				global.LOG.Warnf("[AppStore] failed to update sync status after panic: %v", updateErr)
+	//			}
+	//		}
+	//		appStoreSyncMu.Lock()
+	//		appStoreSyncing = false
+	//		appStoreSyncMu.Unlock()
+	//	}()
+	//	if err := syncTask.Execute(); err != nil {
+	//		if updateErr := NewISettingService().Update("AppStoreLastModified", "0"); updateErr != nil {
+	//			global.LOG.Warnf("[AppStore] failed to reset last modified: %v", updateErr)
+	//		}
+	//		if updateErr := NewISettingService().Update("AppStoreSyncStatus", constant.StatusError); updateErr != nil {
+	//			global.LOG.Warnf("[AppStore] failed to update sync status to error: %v", updateErr)
+	//		}
+	//		return
+	//	}
+	//}()
+	//
+	//global.LOG.Info("[AppStore] sync app from remote task create ok")
 	return nil
 }
 
